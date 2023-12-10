@@ -1,1 +1,2 @@
-product_columnts = ['product_id','product_name','product_price','product_quantity','brand_name','date_updated']
+productColumnsAliased = ['Product ID','Product Name','Product Price','Product Quantity']
+productColumnNames = ['product_id','product_name','product_price','product_quantity']

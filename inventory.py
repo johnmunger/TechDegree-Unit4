@@ -2,9 +2,9 @@ import csv
 import datetime
 
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError
 
 ENGINE = create_engine("sqlite:///inventory.db", echo=True)
 SESSION = sessionmaker(bind=ENGINE)
@@ -33,9 +33,12 @@ class Product(BASE):
     def __repr__(self):
         return f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}"
     def print(self):
-        print(f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}")
+        print(
+            f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}"
+        )
 
-def importBrands(session):
+
+def _import_brands(session):
     with open("./store-inventory/brands.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter="\n")
         rows = list(brandsReader)
@@ -50,7 +53,7 @@ def importBrands(session):
                 print(e)
 
 
-def importProducts(session):
+def _import_products(session):
     with open("./store-inventory/inventory.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter=",")
         rows = list(brandsReader)
@@ -64,7 +67,8 @@ def importProducts(session):
             product.product_quantity = row[2]
             dateArray = row[3].split("/")
             product.date_updated = datetime.date(
-                int(dateArray[2]), int(dateArray[0]), int(dateArray[1]))
+                int(dateArray[2]), int(dateArray[0]), int(dateArray[1])
+            )
             selectedBrand = session.query(Brand).filter(Brand.brand_name == row[4]).first()
             product.brand_id = selectedBrand.brand_id
             session.add(product)
@@ -73,4 +77,3 @@ def importProducts(session):
             except IntegrityError as e:
                 session.rollback()
                 print(e)
-        

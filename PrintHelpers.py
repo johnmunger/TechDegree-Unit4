@@ -1,4 +1,6 @@
 from inventory import Product
-def printObject(Object):
-    for i in 
-    
+def space():
+    print('\n')
+
+def doubleSpace():
+    print('\n\n')
