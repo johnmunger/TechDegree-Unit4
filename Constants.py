@@ -1,0 +1,1 @@
+product_columnts = ['product_id','product_name','product_price','product_quantity','brand_name','date_updated']
