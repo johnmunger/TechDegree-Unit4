@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-ENGINE = create_engine("sqlite:///inventory.db", echo=True)
+ENGINE = create_engine("sqlite:///inventory.db", echo=False)
 SESSION = sessionmaker(bind=ENGINE)
 session = SESSION()
 BASE = declarative_base()
@@ -32,13 +32,8 @@ class Product(BASE):
 
     def __repr__(self):
         return f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}"
-    def print(self):
-        print(
-            f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}"
-        )
 
-
-def _import_brands(session):
+def import_brands(session):
     with open("./store-inventory/brands.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter="\n")
         rows = list(brandsReader)
@@ -53,7 +48,7 @@ def _import_brands(session):
                 print(e)
 
 
-def _import_products(session):
+def import_products(session):
     with open("./store-inventory/inventory.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter=",")
         rows = list(brandsReader)
