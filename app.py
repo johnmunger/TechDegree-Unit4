@@ -1,6 +1,7 @@
+from Constants import MAIN_MENU_OPTIONS
 from PrintHelpers import doubleSpace, space
-from ViewProduct import viewProduct
-from inventory import BASE, ENGINE, Product, importBrands, importProducts, session
+from ProductController import view_product, new_product, analyse_products, backup_database
+from inventory import BASE, ENGINE, import_brands, import_products, session
 
 
 def app():
@@ -8,8 +9,8 @@ def app():
     while app_running:
         print(
             """
-              \nINVENTORY MENU\n
-              \rV)iew Product
+              \nINVENTORY MENU\na
+              \rV)iew Producta
               \rN)ew Product
               \rA)nalyze Product
               \rB)ackup Database
@@ -19,24 +20,22 @@ def app():
         space()
         mainMenuChoice = input("What would you like to do?").upper()
         doubleSpace()
-        if mainMenuChoice in {"V", "N", "A", "B", "Q"}:
+        if mainMenuChoice in MAIN_MENU_OPTIONS:
             if mainMenuChoice == "V":
-                viewProduct()
+                view_product()
             if mainMenuChoice == "N":
-                _new_product()
+                new_product()
+            if mainMenuChoice == "A":
+                analyse_products()
+            if mainMenuChoice == "B":
+                backup_database()
             if mainMenuChoice == "Q":
-                pass
+                app_running = False
             else:
                 print("Please Enter the letters V, N, A, or B.  To Quit Enter Q")
 
-
-def _new_product():
-    product = Product()
-    for i in range(len(product_columns)):
-        attr = input(f"Enter {product_columns[i]}")
-        product.__setattr__(product_columns[i], attr)
 if __name__ == "__main__":
     BASE.metadata.create_all(ENGINE)
-    importBrands(session)
-    importProducts(session)
+    import_brands(session)
+    import_products(session)
     app()

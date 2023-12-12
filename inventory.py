@@ -4,7 +4,7 @@ import datetime
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 ENGINE = create_engine("sqlite:///inventory.db", echo=False)
 SESSION = sessionmaker(bind=ENGINE)
@@ -13,9 +13,9 @@ BASE = declarative_base()
 
 class Brand(BASE):
     __tablename__ = "brands"
-
     brand_id = Column(Integer, primary_key=True)
     brand_name = Column("Brand Name", String, unique=True)
+    products = relationship('Product', backref="brands.brand_id")
 
     def __repr__(self):
         return f"Brand ID: {self.brand_id} Brand Name: {self.brand_name}"
