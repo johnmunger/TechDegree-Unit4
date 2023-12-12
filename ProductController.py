@@ -63,18 +63,22 @@ def view_product():
                         \rS)ubmit
                         \rC)ancel
                         \rOtherwise, press any key to continue editing''')
-                        if answer.upper() == 'S':
-                            editing = False
-                        if answer.upper() == 'C':
-                            raise Exception("Cancelling...")
-                        
+                        try:
+                            if answer.upper() == 'S':
+                                editing = False
+                            if answer.upper() == 'C':
+                                editing = False
+                                raise Exception("Cancelling...")
+                        except:
+                            getInput("Rolling Back Changes")
+                            
                     try:
                         session.commit()
                         printPadding('Product updated successfully')
                         viewing = False
                     except:
                         session.rollback()
-                        print("Abort: Rolling Back Changes")
+                        print("Commit Failed: Rolling Back Changes")
 
                 if editSelection == "D":
                     deleting = True
@@ -84,8 +88,8 @@ def view_product():
                             if answer in DELETE_OPTIONS:
                                 if answer == 'Y':
                                     session.delete(selectedProduct)
-                                else:
-                                    deleting = False
+                                deleting = False
+                                editing = False
                             else:
                                 raise Exception
                         except:
