@@ -30,12 +30,10 @@ DELETE_OPTIONS = {"Y", "N"}
 MAIN_MENU_OPTIONS = {"V", "N", "A", "B", "Q"}
 
 PRODUCT_BRAND_CSV_COLUMN_NAMES = [
-    "product_id",
     "product_name",
     "product_price",
     "product_quantity",
     "date_updated",
-    "brand_id",
     "brand_name"
 ]
 
@@ -43,7 +41,7 @@ ANALYSIS_OPTIONS = [
     'Most expensive Product',
     'Least expensive Product',
     'Most common Brand',
-    'Most Recently Added Product',
-    'Oldest Product',
-    'Most Fecund Product'
+    'Most Recently Updated',
+    'Longest Since Updated',
+    'Highest Quantity Product'
 ]
