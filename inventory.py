@@ -2,20 +2,20 @@ import csv
 import datetime
 
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
 
-ENGINE = create_engine("sqlite:///inventory.db", echo=True)
+ENGINE = create_engine("sqlite:///inventory.db", echo=False)
 SESSION = sessionmaker(bind=ENGINE)
 session = SESSION()
 BASE = declarative_base()
 
 class Brand(BASE):
     __tablename__ = "brands"
-
     brand_id = Column(Integer, primary_key=True)
     brand_name = Column("Brand Name", String, unique=True)
+    products = relationship('Product', backref="brands.brand_id")
 
     def __repr__(self):
         return f"Brand ID: {self.brand_id} Brand Name: {self.brand_name}"
@@ -31,11 +31,9 @@ class Product(BASE):
     brand_id = Column(Integer, ForeignKey("brands.brand_id"))
 
     def __repr__(self):
-        return f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}"
-    def print(self):
-        print(f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price}")
+        return f"Product ID: {self.product_id} Product Name: {self.product_name} Product Quantity: {self.product_quantity} Product Price: {self.product_price} Date Updated: {self.date_updated}"
 
-def importBrands(session):
+def import_brands(session):
     with open("./store-inventory/brands.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter="\n")
         rows = list(brandsReader)
@@ -50,7 +48,7 @@ def importBrands(session):
                 print(e)
 
 
-def importProducts(session):
+def import_products(session):
     with open("./store-inventory/inventory.csv") as csvfile:
         brandsReader = csv.reader(csvfile, delimiter=",")
         rows = list(brandsReader)
@@ -64,7 +62,8 @@ def importProducts(session):
             product.product_quantity = row[2]
             dateArray = row[3].split("/")
             product.date_updated = datetime.date(
-                int(dateArray[2]), int(dateArray[0]), int(dateArray[1]))
+                int(dateArray[2]), int(dateArray[0]), int(dateArray[1])
+            )
             selectedBrand = session.query(Brand).filter(Brand.brand_name == row[4]).first()
             product.brand_id = selectedBrand.brand_id
             session.add(product)
@@ -73,4 +72,3 @@ def importProducts(session):
             except IntegrityError as e:
                 session.rollback()
                 print(e)
-        

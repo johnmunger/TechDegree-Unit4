@@ -1,12 +1,15 @@
-from inventory import BASE, ENGINE, Product, importBrands, importProducts, session
+from Constants import MAIN_MENU_OPTIONS
+from PrintHelpers import getInput, printPadding
+from ProductController import view_product, new_product, analyse_products, backup_database
+from inventory import BASE, ENGINE, import_brands, import_products, session
 
 
 def app():
-    appRunning = True
-    while appRunning:
-        print(
+    app_running = True
+    while app_running:
+        printPadding(
             """
-              \nPROGRAMMING BOOKS
+              \nINVENTORY MENU\n
               \rV)iew Product
               \rN)ew Product
               \rA)nalyze Product
@@ -14,22 +17,23 @@ def app():
               \rQ)uit
               """
         )
-        mainMenuChoice = input("What would you like to do?\n\n").upper()
-        if mainMenuChoice in {"V", "N", "A", "B", "Q"}:
+        mainMenuChoice = getInput("What would you like to do?").upper()
+        if mainMenuChoice in MAIN_MENU_OPTIONS:
             if mainMenuChoice == "V":
-                viewInput = input("Searching by product ID.  Enter Product Id. \n\n")
-                selectedProduct = (
-                    session.query(Product).filter(Product.product_id >= viewInput).first()
-                )
-                print("\n\n")
-                print(selectedProduct)
-                print("\n\n")
+                view_product()
+            if mainMenuChoice == "N":
+                new_product()
+            if mainMenuChoice == "A":
+                analyse_products()
+            if mainMenuChoice == "B":
+                backup_database()
             if mainMenuChoice == "Q":
-                appRunning = False
-            else:
-                print("Please Enter the letters V, N, A, or B.  To Quit Enter Q")
+                app_running = False
+        else:
+            getInput("Please Enter the letters V, N, A, or B.  To Quit Enter Q")
+
 if __name__ == "__main__":
     BASE.metadata.create_all(ENGINE)
-    importBrands(session)
-    importProducts(session)
+    import_brands(session)
+    import_products(session)
     app()
