@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, datetime
 import csv
 from Constants import *
 from PrintHelpers import getInput, getInputInt, printPadding, printProductWithBrandName
@@ -122,7 +122,7 @@ def new_product():
     while addingNew:
         newProduct = Product()
         for i, v in enumerate(PRODUCT_COLUMNS_ALIASED):
-            if(i != 0):
+            if(i != 0):        
                 if PRODUCT_COLUMNS_ALIASED[i] == 'Product Price':
                     value = getInput(f"{v}: ")
                     try:
@@ -134,29 +134,41 @@ def new_product():
                     else:
                         newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
                 elif PRODUCT_COLUMNS_ALIASED[i] == 'Date Updated':
-                    value = getInput("Enter Date in YYYY-MM-DD format: ")
+                    value = date.today()
                     try:
-                        value = format_date(value, newProduct)
                         newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
                     except ValueError as e:
                         getInput(e)      
                 elif PRODUCT_COLUMNS_ALIASED[i] == 'Brand Name':
                     brandName = getInput(f"{v}: ")
-                    brand = Brand()
-                    brand.brand_name = brandName
-                    session.add(brand)
-                    addedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one()
-                    newProduct.brand_id = addedBrand.brand_id
+                    searchedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one_or_none()
+                    if(searchedBrand):
+                        newProduct.brand_id = searchedBrand.brand_id
+                    else:
+                        brand = Brand()
+                        brand.brand_name = brandName
+                        session.add(brand)
+                        addedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one()
+                        newProduct.brand_id = addedBrand.brand_id
 
                 else:
                     value = getInput(f"{v}: ")
                     newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
 
         try:
-            session.add(newProduct)
-            session.commit()
-            printPadding(f'{newProduct} updated successfully')
-            addingNew = False
+            queriedProduct = session.query(Product).filter(Product.product_name == newProduct.product_name).one_or_none()
+            if(queriedProduct):
+                queriedProduct.product_price = newProduct.product_price
+                queriedProduct.product_quantity = newProduct.product_quantity
+                queriedProduct.date_updated = newProduct.date_updated
+                queriedProduct.brand_id = newProduct.brand_id
+                session.commit()
+                addingNew = False
+            else:
+                session.add(newProduct)
+                session.commit()
+                printPadding(f'{newProduct} updated successfully')
+                addingNew = False      
             
         except IntegrityError as e:
             getInput(e)
@@ -213,7 +225,7 @@ def analyse_products():
 def backup_database():
     productBrands = session.query(Product).join(Brand).all()
     try:
-        with open('inventory2.csv', 'w', newline='') as csvfile:
+        with open('backup_inventory.csv', 'w', newline='') as csvfile:
             rowWriter = csv.writer(csvfile, delimiter=',')
             rowWriter.writerow(PRODUCT_BRAND_CSV_COLUMN_NAMES)
             for v in productBrands:
@@ -222,8 +234,20 @@ def backup_database():
                 dateArray = dateString.split("-")
                 rowWriter.writerow([v.product_name,f"${v.product_price}",v.product_quantity,f"{dateArray[1]}/{dateArray[2]}/{dateArray[0]}", brandName])
         
-        printPadding("Database backed up")
+        printPadding("Inventory database backed up")
+        csvfile.close()
         
     except:
-         getInput("Exception on Database Export")
+         getInput("Exception on Inventory Database Export")
+    brands = session.query(Brand).all()
+    try:
+        with open('backup_brands.csv', 'w', newline='\n') as csvfile2:
+            rowWriter = csv.writer(csvfile2)
+            for v in brands:
+                rowWriter.writerow([v.brand_name])
+        
+        printPadding("Brand database backed up")
+        
+    except:
+         getInput("Exception on Brands Database Export")
     
