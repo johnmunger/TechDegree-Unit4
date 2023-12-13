@@ -30,7 +30,7 @@ def app():
             if mainMenuChoice == "Q":
                 app_running = False
         else:
-            getInput("Please Enter the letters V, N, A, or B.  To Quit Enter Q")
+            printPadding("Please Enter the letters V, N, A, or B.  To Quit Enter Q")
 
 if __name__ == "__main__":
     BASE.metadata.create_all(ENGINE)

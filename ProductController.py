@@ -17,26 +17,21 @@ def view_product():
                 if editSelection == "E":
                     editing = True
                     while editing:
-                        for i,v in enumerate(PRODUCT_COLUMNS_ALIASED):
-                            if(i != 0):
-                                print(f'{i}) {v}')
+                        for i,v in enumerate(EDIT_PRODUCT_COLUMNS_ALIASED):
+                            print(f'{i+1}) {v}')
                         k = getInputInt("?: ")
-                        if(PRODUCT_COLUMNS_ALIASED[k] == "Product Price"):
-                            value = getInput(f"{PRODUCT_COLUMNS_ALIASED[k]}: {getattr(selectedProduct, PRODUCT_COLUMN_NAMES[k])}\nUpdated Value: ")
-                            value = format_price(value)
-                            selectedProduct.__setattr__(PRODUCT_COLUMN_NAMES[k],value)
+                        k -= 1
+                        ##Set Date Regardless
+                        value = date.today()
+                        selectedProduct.__setattr__("date_updated", value)
 
-                        elif (PRODUCT_COLUMNS_ALIASED[k] == "Date Updated"):
-                            value = getInput("Enter Date in YYYY:MM:DD format")
-                            try:
-                                value = format_date(value, selectedProduct)
-                            except ValueError as e:
-                                getInput(e)
-                            selectedProduct.__setattr__(PRODUCT_COLUMN_NAMES[k],value)
+                        if(EDIT_PRODUCT_COLUMNS_ALIASED[k] == "Product Price"):
+                            value = getInputInt(f"{EDIT_PRODUCT_COLUMNS_ALIASED[k]}: {getattr(selectedProduct, EDIT_PRODUCT_COLUMN_NAMES[k])}\nUpdated Value: ")
+                            selectedProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[k],value)
 
-                        elif(PRODUCT_COLUMNS_ALIASED[k] == 'Brand Name'):
+                        elif(EDIT_PRODUCT_COLUMNS_ALIASED[k] == 'Brand Name'):
                             brandName = selectedProduct.__getattribute__('brands.brand_id').__getattribute__('brand_name')
-                            value = getInput(f"{PRODUCT_COLUMNS_ALIASED[k]}: {brandName}\nUpdated Value: ")
+                            value = getInput(f"{EDIT_PRODUCT_COLUMNS_ALIASED[k]}: {brandName}\nUpdated Value: ")
                             try:
                                 newBrand = (
                                 session.query(Brand)
@@ -49,11 +44,11 @@ def view_product():
                             except MultipleResultsFound as e:
                                 getInput(e)
                             else:
-                                selectedProduct.__setattr__(PRODUCT_COLUMN_NAMES[k],newBrand.brand_id)
-                                printPadding(f'{PRODUCT_COLUMNS_ALIASED[k]} updated successfully')
+                                selectedProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[k],newBrand.brand_id)
+                                printPadding(f'{EDIT_PRODUCT_COLUMNS_ALIASED[k]} updated successfully')
                         else:
-                            value = getInput(f"{PRODUCT_COLUMNS_ALIASED[k]}: {getattr(selectedProduct, PRODUCT_COLUMN_NAMES[k])}\nUpdated Value: ")
-                            selectedProduct.__setattr__(PRODUCT_COLUMN_NAMES[k],value)
+                            value = getInput(f"{EDIT_PRODUCT_COLUMNS_ALIASED[k]}: {getattr(selectedProduct, EDIT_PRODUCT_COLUMN_NAMES[k])}\nUpdated Value: ")
+                            selectedProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[k],value)
 
                         printPadding("Modified Product is as follows:")
                         
@@ -62,7 +57,7 @@ def view_product():
                         answer = getInput('''
                         \rS)ubmit
                         \rC)ancel
-                        \rOtherwise, press any key to continue editing''')
+                        \rOtherwise, press any key to continue editing: ''')
                         try:
                             if answer.upper() == 'S':
                                 editing = False
@@ -99,14 +94,6 @@ def view_product():
             else:
                 printPadding("Please Enter either E, D, or P")
 
-def format_price(price):
-    try:
-        price = float(price)
-        return price
-    except TypeError:
-        printPadding("TypeError")
-    except ValueError:
-        printPadding("ValueError")
 def format_date(date, selectedProduct):
     dateArray = date.split('-')
     dateDate = datetime.date(int(dateArray[0]),int(dateArray[1]),int(dateArray[2]))
@@ -121,39 +108,28 @@ def new_product():
     addingNew = True
     while addingNew:
         newProduct = Product()
-        for i, v in enumerate(PRODUCT_COLUMNS_ALIASED):
-            if(i != 0):        
-                if PRODUCT_COLUMNS_ALIASED[i] == 'Product Price':
-                    value = getInput(f"{v}: ")
-                    try:
-                        value = format_price(value)
-                    except TypeError as e:
-                        getInput(e)
-                    except ValueError as e:
-                        getInput(e)
-                    else:
-                        newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
-                elif PRODUCT_COLUMNS_ALIASED[i] == 'Date Updated':
-                    value = date.today()
-                    try:
-                        newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
-                    except ValueError as e:
-                        getInput(e)      
-                elif PRODUCT_COLUMNS_ALIASED[i] == 'Brand Name':
-                    brandName = getInput(f"{v}: ")
-                    searchedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one_or_none()
-                    if(searchedBrand):
-                        newProduct.brand_id = searchedBrand.brand_id
-                    else:
-                        brand = Brand()
-                        brand.brand_name = brandName
-                        session.add(brand)
-                        addedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one()
-                        newProduct.brand_id = addedBrand.brand_id
-
+        value = date.today()
+        newProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[i], value)
+        for i, v in enumerate(EDIT_PRODUCT_COLUMNS_ALIASED):       
+            if EDIT_PRODUCT_COLUMNS_ALIASED[i] == 'Product Price':
+                value = getInputInt(f"{v}: ")
+                newProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[i], value)
+                     
+            elif EDIT_PRODUCT_COLUMNS_ALIASED[i] == 'Brand Name':
+                brandName = getInput(f"{v}: ")
+                searchedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one_or_none()
+                if(searchedBrand):
+                    newProduct.brand_id = searchedBrand.brand_id
                 else:
-                    value = getInput(f"{v}: ")
-                    newProduct.__setattr__(PRODUCT_COLUMN_NAMES[i], value)
+                    brand = Brand()
+                    brand.brand_name = brandName
+                    session.add(brand)
+                    addedBrand = session.query(Brand).filter(Brand.brand_name == brandName).one()
+                    newProduct.brand_id = addedBrand.brand_id
+
+            else:
+                value = getInput(f"{v}: ")
+                newProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[i], value)
 
         try:
             queriedProduct = session.query(Product).filter(Product.product_name == newProduct.product_name).one_or_none()
@@ -217,7 +193,7 @@ def analyse_products():
         elif itsANumber == 6:
             printProductWithBrandName(session.query(Product).order_by(Product.product_quantity.desc()).first())
 
-        answer = getInput('To quit press Q. Otherwise, press any key to continue')
+        answer = getInput('To quit press Q. Otherwise, press any key to continue').upper()
 
         if answer == 'Q':
             analyzing = False
@@ -232,7 +208,8 @@ def backup_database():
                 brandName = v.__getattribute__('brands.brand_id').__getattribute__('brand_name')
                 dateString = v.date_updated.isoformat()
                 dateArray = dateString.split("-")
-                rowWriter.writerow([v.product_name,f"${v.product_price}",v.product_quantity,f"{dateArray[1]}/{dateArray[2]}/{dateArray[0]}", brandName])
+                floatPrice = v.product_price/100
+                rowWriter.writerow([v.product_name,f"${floatPrice}",v.product_quantity,f"{dateArray[1]}/{dateArray[2]}/{dateArray[0]}", brandName])
         
         printPadding("Inventory database backed up")
         csvfile.close()
