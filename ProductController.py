@@ -109,7 +109,7 @@ def new_product():
     while addingNew:
         newProduct = Product()
         value = date.today()
-        newProduct.__setattr__(EDIT_PRODUCT_COLUMN_NAMES[i], value)
+        newProduct.__setattr__('date_updated', value)
         for i, v in enumerate(EDIT_PRODUCT_COLUMNS_ALIASED):       
             if EDIT_PRODUCT_COLUMNS_ALIASED[i] == 'Product Price':
                 value = getInputInt(f"{v}: ")
